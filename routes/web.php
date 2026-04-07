@@ -7,6 +7,6 @@ Route::get('/customers/testStore', [CustomerController::class, 'create']);
 Route::post('/customers', [CustomerController::class, 'store']);
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('customers.testStore');
 });
 
