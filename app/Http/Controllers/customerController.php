@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Customer;
 use App\Models\User;
-use Storage;
+use Illuminate\Support\Facades\Storage;
 class CustomerController extends Controller
 {
     /**
@@ -54,6 +54,8 @@ class CustomerController extends Controller
     public function show(string $id)
     {
         //
+        $customer = Customer::find($id);
+        return response()->json($customer);
     }
 
     /**
@@ -62,6 +64,41 @@ class CustomerController extends Controller
     public function update(Request $request, string $id)
     {
         //
+        $customer = Customer::find($id);
+
+        $user = $customer->user;
+
+        $user->update([
+            'name' => $request->fname . ' ' . $request->lname,
+            'email' => $request->email,
+            'password' => bcrypt($request->password),
+        ]);
+
+// handle file upload
+        if ($request->hasFile('uploads')) {
+            $file = $request->file('uploads');
+            $filename = $file->getClientOriginalName();
+
+            Storage::put('public/images/' . $filename, file_get_contents($file));
+
+            $imagePath = 'storage/images/' . $filename;
+    }
+
+// update customer
+        $customer->update([
+            'lname' => $request->lname,
+            'fname' => $request->fname,
+            'addressline' => $request->addressline,
+            'zipcode' => $request->zipcode,
+            'phone' => $request->phone,
+            'image_path' => $imagePath ?? $customer->image_path,
+        ]);
+
+        return response()->json([
+            "success" => "customer update successfully.",
+            "customer" => $customer,
+            "status" => 200
+        ]);
     }
 
     /**
